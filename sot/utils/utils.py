@@ -650,33 +650,40 @@ class StepInfo:
     def need_dynamic_info(self):
         return len(self.dyn_time_costs) < self.REQUIRED_DYN_INFOS
 
-
+# 单例模式
 @Singleton
 class StepInfoManager:
     def __init__(self):
         self.step_record = {}
+        # 当前代码
         self.current_code = None
+        # 存储当前动转静步骤的相关信息, 包含
         self.current_step_info = None
 
+    # 装饰器定义上下文管理器
     @contextmanager
     def step_guard(self, code):
         try:
+            # 保存current_code & current_step_info 
             old_code = self.current_code
             old_info = self.current_step_info
 
+            # 处理传入code
             self.current_code = code
+            # 如果code未被处理过(cache), 则记录并创建StepInfo对象
             if code not in self.step_record:
                 self.step_record[code] = StepInfo()
             self.current_step_info = self.step_record[code]
 
             self.current_step_info.step_count += 1
-
+            
             log(
-                2,
+                2,  
                 f"[Cost Model] New step start, current state is {self.current_state}\n",
             )
             yield
         finally:
+            # 异常报错则回退, 保持上下文不变
             self.current_code = old_code
             self.current_step_info = old_info
 
@@ -706,8 +713,9 @@ class StepInfoManager:
     def current_step(self):
         return self.current_step_info.step_count
 
-    @property
+    @property 
     def current_state(self):
+        # 返回当前步骤的状态StepInfo.state, 状态分三种, COLLECT_INFO/RUN_SOT/RUN_DYN
         return self.current_step_info.state
 
     def clear(self):
