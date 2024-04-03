@@ -38,6 +38,8 @@ def print_locals(frame):
 
 
 def eval_frame_callback(frame, **kwargs) -> CustomCode:
+    # -> sot/profiler.py:26 EventGuard定义
+    # 看起来记录栈帧相关信息
     with EventGuard(
         f"eval_frame_callback: {frame.f_code.co_name}", event_level=2
     ):
