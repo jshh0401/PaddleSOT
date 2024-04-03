@@ -12,7 +12,10 @@ def foo(x: paddle.Tensor, y: paddle.Tensor):
 def main():
     x = paddle.rand([2, 3])
     y = paddle.rand([2, 3])
+    # 动态图输出
     dygraph_out = foo(x, y)
+    # 动转静态图输出, 调用symbolic_translate, 传入foo函数, 自动转写
+    # -> sot/translate.py:21
     symbolic_translate_out = symbolic_translate(foo)(x, y)
 
     print("dygraph_out:", dygraph_out)

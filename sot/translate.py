@@ -76,14 +76,18 @@ def symbolic_translate(fn: Callable[P, R], **kwargs) -> Callable[P, R]:
     """
 
     def callback(frame):
+        # SOT的主要执行逻辑, 重新解释执行frame
+        # -> sot/opcode_translator/transform.py:40 
         return eval_frame_callback(frame, **kwargs)
 
     def impl_sot(*args: P.args, **kwargs: P.kwargs) -> R:
+        # 断言声明保证function有__code__
         assert hasattr(
             fn, "__code__"
         ), "Target function doesn't have code for simulating."
         StepInfoManager().sot_step()
         GraphLogger().clear()
+        # 这里看起来对应Eval Frame模块, 将默认的执行器替换为自定义的解释函数callback
         paddle.framework.core.set_eval_frame(callback)
         try:
             outs = fn(*args, **kwargs)
@@ -96,20 +100,25 @@ def symbolic_translate(fn: Callable[P, R], **kwargs) -> Callable[P, R]:
         return outs
 
     def impl_dynamic(*args: P.args, **kwargs: P.kwargs) -> R:
+        # 直接执行
         outs = fn(*args, **kwargs)
         return outs
 
     def impl(*args: P.args, **kwargs: P.kwargs) -> R:
+        # StepInfoManager
         with StepInfoManager().step_guard(fn.__code__):
             state = StepInfoManager().current_state
 
+            # 动转静实现
             if state == StepState.RUN_SOT:
                 return impl_sot(*args, **kwargs)
+            # 动态图实现
             elif state == StepState.RUN_DYN:
                 return impl_dynamic(*args, **kwargs)
+            # 收集信息实现, 看起来像统计动态图/动转静两种实现的时间损耗的
             elif state == StepState.COLLECT_INFO:
                 return StepInfoManager().collect_info(
                     impl_dynamic, impl_sot, *args, **kwargs
                 )
-
+    # 返回impl函数
     return impl
