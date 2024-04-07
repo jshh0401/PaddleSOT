@@ -1437,6 +1437,7 @@ class OpcodeExecutor(OpcodeExecutorBase):
     """
 
     def __init__(self, frame: types.FrameType, **kwargs):
+        # 生成Function Graph
         graph = FunctionGraph(frame, **kwargs)
         self._frame = frame
         self._name = "Executor"

@@ -55,6 +55,7 @@ class OpcodeExecutorCache:
         self.translate_count = 0
 
     def __call__(self, frame: types.FrameType, **kwargs) -> CustomCode:
+        # 判断code是否在缓存中
         code: types.CodeType = frame.f_code
         if code not in self.cache:
             log(2, f"[Cache]: Firstly call {code}\n")

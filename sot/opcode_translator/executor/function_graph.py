@@ -161,6 +161,8 @@ class FunctionGraph:
         NOTE:
             Why don't use __deepcopy__, because memo is not a deepcopy, i.e inner_out is only a shallow copy, SIR is a deepcopy.
         """
+        # 保存当前FunctionGraph的状态, 用于发生错误时恢复状态
+        # 拷贝
         saved_stmt_ir = deepcopy(self.sir_ctx.TOS)
         return FunctionGraph.Memo(
             inner_out=set(self.inner_out),
