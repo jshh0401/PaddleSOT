@@ -103,8 +103,13 @@ def gen_code_options(code: types.CodeType) -> dict[str, Any]:
         dict[str, any]: The code options.
     """
     code_options = {}
+    # python 代码的相关属性, 大概包含
+    # ['co_argcount', 'co_posonlyargcount', 'co_kwonlyargcount', 'co_nlocals', 'co_stacksize', 
+    # 'co_flags', 'co_code', 'co_consts', 'co_names', 'co_varnames', 'co_filename', 'co_name', 
+    # 'co_firstlineno', 'co_lnotab', 'co_freevars', 'co_cellvars']
     for k in PYCODE_ATTRIBUTES:
         val = getattr(code, k)
+        # 做了一些类型转换, 可能方便后面处理
         if isinstance(val, tuple):
             val = list(val)
         code_options[k] = val
@@ -400,6 +405,7 @@ def stacksize(instructions: list[Instruction]) -> float:
 
 class PyCodeGen:
     """Helper to create new code object"""
+    # 创建一个新的code object
 
     def __init__(
         self, frame: types.FrameType, disable_eval_frame: bool = False
@@ -412,6 +418,7 @@ class PyCodeGen:
             disable_eval_frame (bool): Whether to disable the evaluation frame. Defaults to False.
         """
         self._frame = frame
+        # 函数帧实际代码
         self._origin_code = frame.f_code
         self._code_options = gen_code_options(self._origin_code)
         self.update_code_name("", is_resumed_fn=False)

@@ -143,9 +143,12 @@ def skip_function(function):
 
 
 def need_skip(frame):
+    # 判断frame是否需要跳过, 默认的跳过是paddle.nn.Sequential.forward
+    # 原因尚不清楚
     pycode = frame.f_code
     if pycode in no_skip_code:
         return False
+    # 自定义的一些可以跳过的函数帧, 默认是空集合
     if pycode in customed_skip_code:
         log(3, f"Skip frame by code: {pycode}\n")
         return True

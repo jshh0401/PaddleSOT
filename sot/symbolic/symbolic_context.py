@@ -41,6 +41,7 @@ class SymbolicTraceContext:
             StatementIR: the top of stack.
         """
 
+        # 返回sir 栈顶元素, top of sir
         return self.sir_stack[-1]
 
     def call_SIR(self, sirname, inputs, outputs, stacks):

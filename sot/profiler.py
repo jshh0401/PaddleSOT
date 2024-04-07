@@ -25,9 +25,28 @@ class SotProfiler:
 @contextmanager
 def EventGuard(event_name, event_level=0):
     try:
+        # 全局的事件等级
         global _event_level
+        # 标记是否存在需要出栈的事件
         need_pop = False
+        # 目前还不知道event_level具体代表啥
         if _event_level >= event_level:
+            # 这里对应c++代码, 在pybind暴露
+            # [](const std::string &name) platform::CudaNvtxRangePush(name, platform::NvtxRangeColor::Green)
+            """
+            void CudaNvtxRangePush(const std::string& name, const NvtxRangeColor color) {
+                nvtxEventAttributes_t eventAttrib;
+                eventAttrib.version = NVTX_VERSION;
+                eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE;
+                eventAttrib.colorType = NVTX_COLOR_ARGB;
+                eventAttrib.color = static_cast<uint32_t>(color);
+                eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII;
+                eventAttrib.message.ascii = name.c_str();
+
+                dynload::nvtxRangePushEx(&eventAttrib);
+            }
+            """
+            # 看起来像入栈了一些事件有关的信息
             core.nvprof_nvtx_push(event_name)
             need_pop = True
         yield

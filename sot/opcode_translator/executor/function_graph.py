@@ -110,6 +110,8 @@ class FunctionGraph:
         self.inner_out = set()
         self.input_variables = []  # Store variables required within a function
         self.pycode_gen = PyCodeGen(frame, disable_eval_frame=True)
+        # SideEffects指代码执行过程中除了函数返回值之外，还对调用方产生了额外的影响，
+        # 比如修改全局变量、修改可变的共享变量等
         self.side_effects = SideEffects()
         self._global_guarded_variables: OrderedSet[VariableBase] = OrderedSet()
         self._print_variables = []
@@ -161,6 +163,8 @@ class FunctionGraph:
         NOTE:
             Why don't use __deepcopy__, because memo is not a deepcopy, i.e inner_out is only a shallow copy, SIR is a deepcopy.
         """
+        # 保存当前FunctionGraph的状态, 用于发生错误时恢复状态
+        # 拷贝
         saved_stmt_ir = deepcopy(self.sir_ctx.TOS)
         return FunctionGraph.Memo(
             inner_out=set(self.inner_out),
@@ -274,6 +278,8 @@ class FunctionGraph:
         - Restore the output
         - Return the top of the stack
         """
+        import ipdb
+        ipdb.set_trace()
         from ..breakpoint import BreakpointManager
 
         BreakpointManager().on_event("start_compile")

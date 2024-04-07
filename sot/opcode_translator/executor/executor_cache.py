@@ -55,9 +55,11 @@ class OpcodeExecutorCache:
         self.translate_count = 0
 
     def __call__(self, frame: types.FrameType, **kwargs) -> CustomCode:
+        # 判断code是否在缓存中
         code: types.CodeType = frame.f_code
         if code not in self.cache:
             log(2, f"[Cache]: Firstly call {code}\n")
+            # 如果函数不在缓存中, 翻译这个函数帧
             new_custom_code, guard_fn = self.translate(frame, **kwargs)
             self.cache[code] = [(new_custom_code, guard_fn)]
             return new_custom_code
@@ -175,6 +177,7 @@ def start_translate(frame: types.FrameType, **kwargs) -> GuardedFunction:
     Returns:
         GuardedFunction | None: The translated code object and its guard function, or None if translation fails.
     """
+    # 核心的翻译函数, 根据给定的函数帧执行, 返回翻译后的code object 和它的 guard 函数
     simulator = OpcodeExecutor(frame, **kwargs)
     try:
         new_custom_code, guard_fn = simulator.transform()
