@@ -234,13 +234,16 @@ class Cache:
         self.hit_num = 0
 
     def __call__(self, *args, **kwargs):
+        # 根据statementIR 生成cache key
         cache_key = self.key_fn(*args, **kwargs)
         if cache_key is None:
             return self.value_fn(*args, **kwargs)
+        # 检查cache是否命中
         if cache_key in self.cache:
             log(5, "cache hit: ", cache_key, "\n")
             self.hit_num += 1
             return self.cache[cache_key]
+        # 从statementIR 生成 static graph function
         value = self.value_fn(*args, **kwargs)
         self.cache[cache_key] = value
         return value

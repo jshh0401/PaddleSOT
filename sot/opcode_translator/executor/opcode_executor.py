@@ -494,6 +494,7 @@ class OpcodeExecutorBase:
                 raise InnerError("lasti out of range, InnerError.")
             cur_instr = self._instructions[self._lasti]
             self._lasti += 1
+            # 执行一条字节码
             is_stop = self.step(cur_instr)
             if is_stop:
                 self.stop_state = is_stop.state
@@ -534,6 +535,8 @@ class OpcodeExecutorBase:
             breakpoint()  # breakpoint for debug
 
         with EventGuard(f"{instr.opname}", event_level=1):
+            # 根据 instr 执行指令, 底下实现了一系列 指令函数
+            # 这里看起来不是修改指令码, 而是模拟执行这条字节码?
             return getattr(self, instr.opname)(instr)  # run single step.
 
     def indexof(self, instr: Instruction):
@@ -1442,6 +1445,8 @@ class OpcodeExecutor(OpcodeExecutorBase):
         self._frame = frame
         self._name = "Executor"
         self.call_stack[:] = []
+        # python支持通过dis模块反汇编python字节码
+        # dis.dis(function)
         super().__init__(frame.f_code, graph)
         Dispatcher.graph = graph
 
@@ -1455,6 +1460,7 @@ class OpcodeExecutor(OpcodeExecutorBase):
         Prepare the virtual environment for execution by adding variables from locals, globals, builtins, and constants.
 
         """
+        # 准备一个虚拟环境
         log(
             3,
             f"[Executor] code options: co_cellvars={self._frame.f_code.co_cellvars}\n",

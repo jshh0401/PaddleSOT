@@ -67,7 +67,8 @@ def eval_frame_callback(frame, **kwargs) -> CustomCode:
 
             log(3, f"[transform] OriginCode: {frame.f_code.co_name}\n")
             log_do(3, lambda: dis.dis(frame.f_code))
-
+            
+            # 核心翻译部分
             custom_code = OpcodeExecutorCache()(frame, **kwargs)
 
             if custom_code.code is None:
